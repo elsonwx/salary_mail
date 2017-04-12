@@ -112,8 +112,8 @@ def main():
             send_result = send_mail(item[0], mail_subject, html_content, user, pwd, server, port, enable_ssl)
             if not send_result:
                 has_failture = True
-                print 'mail to:' + item[0].encode('utf-8') + '  failed！！！！，please send this email manually.'
-                loginfo('mail to:' + item[0].encode('utf-8') + ' failed！！！！，please send this email manually.')
+                print 'mail to:' + item[0].encode('utf-8') + ' failed!!!,please send this email manually.'
+                loginfo('mail to:' + item[0].encode('utf-8') + ' failed!!!,please send this email manually.')
             else:
                 print 'mail to:' + item[0].encode('utf-8') + ' Successfully'
                 time.sleep(3)

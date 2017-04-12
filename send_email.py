@@ -72,6 +72,7 @@ def main():
     html_template = '<table border="1" style="border-collapse:collapse">'
     html_template += '<thead>'
     html_template += '<tr>'
+    titles = ['' if v is None else v for v in titles]
     for title in titles[1:]:
         html_template += '<th style="padding-left:20px;padding-right:20px">' + title + '</th>'
     html_template += '</tr>'
@@ -104,14 +105,15 @@ def main():
         # remove the first email column
         format_item = tuple(format_item)[1:]
         html_content = html_template % format_item
-        send_result = send_mail(item[0], mail_subject, html_content, user, pwd, server, port, enable_ssl)
-        if not send_result:
-            has_failture = True
-            print '邮件发送到: ' + item[1].encode('utf-8') + '  失败！！！！，请手动发送: '+ item[1].encode('utf-8') + '的邮件'
-            loginfo('邮件发送到: ' + item[1].encode('utf-8') + '  失败！！！！，请手动发送: '+ item[1].encode('utf-8') + '的邮件')
-        else:
-            print '邮件发送到: ' + item[1].encode('utf-8') + '  成功'
-            time.sleep(3)
+        if item[0] is not None:
+            send_result = send_mail(item[0], mail_subject, html_content, user, pwd, server, port, enable_ssl)
+            if not send_result:
+                has_failture = True
+                print '邮件发送到: ' + item[1].encode('utf-8') + '  失败！！！！，请手动发送: '+ item[1].encode('utf-8') + '的邮件'
+                loginfo('邮件发送到: ' + item[1].encode('utf-8') + '  失败！！！！，请手动发送: '+ item[1].encode('utf-8') + '的邮件')
+            else:
+                print '邮件发送到: ' + item[1].encode('utf-8') + '  成功'
+                time.sleep(3)
 
     if has_failture:
         print "有员工邮件发送失败，请在log.txt中查看"

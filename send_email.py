@@ -2,6 +2,7 @@
 # -*-coding:utf-8-*-
 
 import os
+import sys
 import codecs
 import time
 import datetime
@@ -87,8 +88,8 @@ def main():
 
     today_day = datetime.datetime.now().day
     today_month = datetime.datetime.now().month
-    print '本公司5号之前发工资'
-    print '今天是%s月%s号' % (today_month, today_day)
+    print 'The Company paid wages before the 5th'
+    print 'Today is ' + time.strftime("%B %d")
     mail_subject = '%s月份工资条，请查收'
     # Pay money before the 5th of each month
     if today_day > 5:
@@ -98,7 +99,9 @@ def main():
         if today_month == 0:
             today_month = 12
         mail_subject = mail_subject % today_month
-    print '邮件主题将显示为: %s' % mail_subject
+    english_month = datetime.date(1900, today_month, 1).strftime('%B')
+    print 'The mail subject will be show as "' + english_month + ' salley bill"'
+    print "\n"
     has_failture = False
     for item in salary_data:
         format_item = ['' if v is None else v for v in item]
@@ -109,15 +112,19 @@ def main():
             send_result = send_mail(item[0], mail_subject, html_content, user, pwd, server, port, enable_ssl)
             if not send_result:
                 has_failture = True
-                print '邮件发送到: ' + item[1].encode('utf-8') + '  失败！！！！，请手动发送: '+ item[1].encode('utf-8') + '的邮件'
-                loginfo('邮件发送到: ' + item[1].encode('utf-8') + '  失败！！！！，请手动发送: '+ item[1].encode('utf-8') + '的邮件')
+                print 'mail to:' + item[0].encode('utf-8') + '  failed！！！！，please send this email manually.'
+                loginfo('mail to:' + item[0].encode('utf-8') + ' failed！！！！，please send this email manually.')
             else:
-                print '邮件发送到: ' + item[1].encode('utf-8') + '  成功'
+                print 'mail to:' + item[0].encode('utf-8') + ' Successfully'
                 time.sleep(3)
-
+    print "\n"
     if has_failture:
-        print "有员工邮件发送失败，请在log.txt中查看"
+        print "There are some mails failed to be send, please check theme in the log.txt"
+        print "\n"
+        raw_input('Please input any key to quit...')
     else:
-        print "程序运行完成，所有员工邮件发送成功"
-
+        print "Program has run successfully,all the mails have been sent successfully."
+        print 'The program will exit in 3 seconds...'
+        time.sleep(3)
+    sys.exit(0)
 main()

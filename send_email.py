@@ -25,8 +25,8 @@ def loginfo(msg):
 def send_mail(to_addr, subject, html_template, user_mail, user_passwd, smtp_server, smtp_port, enable_ssl):
     try:
         message = MIMEText(html_template, 'html', 'utf-8')
-        message['From'] = Header(user_mail, 'utf-8')
-        message['To'] = Header(to_addr, 'utf-8')
+        message['From'] = Header(user_mail)
+        message['To'] = Header(to_addr)
         message['Subject'] = Header(subject, 'utf-8')
         mail_obj = None
         if enable_ssl:

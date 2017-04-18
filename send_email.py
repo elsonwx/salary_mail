@@ -45,7 +45,7 @@ def send_mail(to_addr, subject, html_template, user_mail, user_passwd, smtp_serv
 def read_data(excel_file):
     data = []
     titles = []
-    wb = load_workbook(filename=excel_file, read_only=True)
+    wb = load_workbook(filename=excel_file, read_only=True, data_only=True)
     ws = wb.worksheets[0]
     first_line = True
     for row in ws.rows:

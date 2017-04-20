@@ -3,9 +3,13 @@
 
 ### 配置
 - 安装python依赖
-> pip install openpyxl
+```
+  pip install openpyxl
+```
 - config.ini填写发送者邮件相关信息
 - data.xlsx工资条信息，对excel文件的要求，第一行为标题，第一列为邮箱
 
 ### 发送邮件
-> python send_email.py
+```
+python send_email.py
+```

@@ -59,7 +59,7 @@ def read_data(excel_file):
                 if first_column:
                     rows_check = check_merge(cell.row, cell.col_idx, ws.merged_cells)
                     if rows_check["type"] == 'rowspan':
-                        staff_rows.append(rows_check["num"])
+                        staff_rows.append(rows_check["rowspan"])
                     elif cell.value is not None:
                         staff_rows.append(1)
                     elif cell.value is None and rows_check["type"] == 'normal':
@@ -84,16 +84,21 @@ def check_merge(row, col, merged_cells):
         if item.min_col == item.max_col == col:
             # rowspan
             if item.min_row == row:
-                return {"type": "rowspan", "num": item.max_row - item.min_row + 1}
+                return {"type": "rowspan", "rowspan": item.max_row - item.min_row + 1}
             elif item.min_row < row <= item.max_row:
                 return {"type": "none"}
         # on the same row
         elif item.max_row == item.min_row == row:
             # colspan
             if item.min_col == col:
-                return {"type": "colspan", "num": item.max_col - item.min_col + 1}
+                return {"type": "colspan", "colspan": item.max_col - item.min_col + 1}
             elif item.min_col < col <= item.max_col:
                 return {"type": "none"}
+        elif item.min_row == row and item.min_col == col:
+            return {"type": "mix", "rowspan": item.max_row - item.min_row + 1,
+                    "colspan": item.max_col - item.min_col + 1}
+        elif item.min_row <= row <= item.max_row and item.min_col <= col <= item.max_col:
+            return {"type": "none"}
     return {"type": "normal"}
 
 
@@ -140,7 +145,7 @@ def main():
     for staff_row in staff_rows:
         staff_email = salary_data[row_index][0]["value"]
         holder_str = ''
-        for item in salary_data[row_index:row_index+staff_row]:
+        for item in salary_data[row_index:row_index + staff_row]:
             holder_str += '<tr>'
             for i in item[1:]:
                 check = check_merge(i["row"], i["col"], merged_cells)
@@ -149,9 +154,13 @@ def main():
                 except Exception as e:
                     print e
                 if check["type"] == 'rowspan':
-                    holder_str += '<td style="padding-left:20px;padding-right:20px;" rowspan="%s">%s</td>' % (check["num"],val)
+                    holder_str += '<td style="padding-left:20px;padding-right:20px;" rowspan="%s">%s</td>' % (
+                        check["rowspan"], val)
                 if check["type"] == 'colspan':
-                    holder_str += '<td style="text-align:center;" colspan="%s">%s</td>' % (check["num"],val)
+                    holder_str += '<td style="text-align:center;" colspan="%s">%s</td>' % (check["colspan"], val)
+                if check["type"] == 'mix':
+                    holder_str += '<td style="text-align:center;" rowspan="%s" colspan="%s">%s</td>' % (
+                    check["rowspan"], check["colspan"], val)
                 if check["type"] == 'none':
                     pass
                 if check["type"] == 'normal':

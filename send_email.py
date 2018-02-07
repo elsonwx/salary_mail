@@ -62,6 +62,9 @@ def read_data(excel_file):
                         staff_rows.append(rows_check["num"])
                     elif cell.value is not None:
                         staff_rows.append(1)
+                    elif cell.value is None and rows_check["type"] == 'normal':
+                        print 'there is a blank line in the excel file,please check the excel file'
+                        sys.exit(1)
                 item.append({
                     "value": cell.value,
                     "coordinate": cell.coordinate,

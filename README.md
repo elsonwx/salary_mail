@@ -18,3 +18,12 @@
 ```
 python send_email.py
 ```
+
+
+
+##### update log
+
+2018.02.07：已支持合并单元格
+
+![](./screenshot/screenshot.png)
+

@@ -60,9 +60,7 @@ def read_data(excel_file):
                     rows_check = check_merge(cell.row, cell.col_idx, ws.merged_cells)
                     if rows_check["type"] == 'rowspan':
                         staff_rows.append(rows_check["rowspan"])
-                    elif cell.value is not None:
-                        staff_rows.append(1)
-                    elif cell.value is None and rows_check["type"] == 'normal':
+                    elif rows_check["type"] == 'normal':
                         staff_rows.append(1)
                 item.append({
                     "value": cell.value,

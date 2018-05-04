@@ -37,7 +37,7 @@ def send_mail(to_addr, subject, html_template, user_mail, user_passwd, smtp_serv
         mail_obj.quit()
         return True
     except Exception as e:
-        loginfo('send mail to ' + to_addr + ' failed,exception: ' + str(e))
+        loginfo('send mail to ' + str(to_addr) + ' failed,exception: ' + str(e))
         return False
 
 
@@ -168,10 +168,10 @@ def main():
             send_result = send_mail(staff_email, mail_subject, html_content, user, pwd, server, port, enable_ssl)
             if not send_result:
                 has_failture = True
-                print 'mail to:' + staff_email.encode('utf-8') + ' failed!!!,please send this email manually.'
-                loginfo('mail to:' + staff_email.encode('utf-8') + ' failed!!!,please send this email manually.')
+                print 'mail to:' + str(staff_email) + ' failed!!!,please send this email manually.'
+                loginfo('mail to:' + str(staff_email) + ' failed!!!,please send this email manually.')
             else:
-                print 'mail to:' + staff_email.encode('utf-8') + ' Successfully'
+                print 'mail to:' + str(staff_email) + ' Successfully'
                 time.sleep(1)
         row_index += staff_row
     print "\n"

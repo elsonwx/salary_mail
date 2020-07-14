@@ -7,7 +7,7 @@ import codecs
 import time
 import datetime
 import smtplib
-import ConfigParser
+import configparser
 from email.mime.text import MIMEText
 from email.header import Header
 from openpyxl import load_workbook
@@ -18,7 +18,7 @@ log_path = current_dir + os.sep + 'log.txt'
 
 def loginfo(msg):
     with codecs.open(log_path, 'a', 'utf-8') as f:
-        f.write(time.strftime("%Y-%m-%d %X") + "-" + msg.decode('utf-8') + os.linesep)
+        f.write(time.strftime("%Y-%m-%d %X") + "-" + msg + os.linesep)
 
 
 def send_mail(to_addr, subject, html_template, user_mail, user_passwd, smtp_server, smtp_port, enable_ssl):
@@ -100,7 +100,7 @@ def check_merge(row, col, merged_cells):
 
 
 def main():
-    cf = ConfigParser.ConfigParser()
+    cf = configparser.ConfigParser()
     cf.read(current_dir + os.sep + 'config.ini')
     user = cf.get('user', 'email')
     pwd = cf.get('user', 'password')
@@ -123,10 +123,10 @@ def main():
 
     today_day = datetime.datetime.now().day
     today_month = datetime.datetime.now().month
-    print 'The Company paid wages before the 5th'
-    print 'Today is ' + time.strftime("%B %d")
-    mail_subject = '%s月份工资条，请查收'
-    # Pay money before the 5th of each month
+    print('The Company paid wages before the 10th')
+    print('Today is ' + time.strftime("%B %d"))
+    mail_subject = "%s月份工资条，请查收"
+    # Pay money before the 10th of each month
     if today_day > 5:
         mail_subject = mail_subject % today_month
     else:
@@ -135,8 +135,8 @@ def main():
             today_month = 12
         mail_subject = mail_subject % today_month
     english_month = datetime.date(1900, today_month, 1).strftime('%B')
-    print 'The mail subject will be show as "' + english_month + ' salley bill"'
-    print "\n"
+    print('The mail subject will be show as "' + english_month + ' salley bill"')
+    print("\n")
     has_failture = False
     row_index = 0
     for staff_row in staff_rows:
@@ -149,7 +149,7 @@ def main():
                 try:
                     val = '' if i["value"] is None else i["value"]
                 except Exception as e:
-                    print e
+                    print(e)
                 if check["type"] == 'rowspan':
                     holder_str += '<td style="padding-left:20px;padding-right:20px;" rowspan="%s">%s</td>' % (
                         check["rowspan"], val)
@@ -168,20 +168,20 @@ def main():
             send_result = send_mail(staff_email, mail_subject, html_content, user, pwd, server, port, enable_ssl)
             if not send_result:
                 has_failture = True
-                print 'mail to:' + str(staff_email) + ' failed!!!,please send this email manually.'
+                print('mail to:' + str(staff_email) + ' failed!!!,please send this email manually.')
                 loginfo('mail to:' + str(staff_email) + ' failed!!!,please send this email manually.')
             else:
-                print 'mail to:' + str(staff_email) + ' Successfully'
+                print('mail to:' + str(staff_email) + ' Successfully')
                 time.sleep(1)
         row_index += staff_row
-    print "\n"
+    print("\n")
     if has_failture:
-        print "There are some mails failed to be send, please check theme in the log.txt"
-        print "\n"
-        raw_input('Please input any key to quit...')
+        print("There are some mails failed to be send, please check theme in the log.txt")
+        print("\n")
+        input('Please input any key to quit...')
     else:
-        print "Program has run successfully,all the mails have been sent successfully."
-        print 'The program will exit in 3 seconds...'
+        print("Program has run successfully,all the mails have been sent successfully.")
+        print('The program will exit in 3 seconds...')
         time.sleep(3)
     sys.exit(0)
 

@@ -5,7 +5,7 @@
 1. 安装python依赖
 
    ```
-   pip install openpyxl
+   pip3 install openpyxl
    ```
 
 2. 在config.ini配置发送人相关信息。例如用腾讯企业邮箱发送，则参照[文档](http://service.exmail.qq.com/cgi-bin/help?id=28&no=1000585&subtype=1)，配置为
@@ -16,7 +16,7 @@
 
 ### 发送邮件
 ```
-python send_email.py
+python3 send_email.py
 ```
 
 

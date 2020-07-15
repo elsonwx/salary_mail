@@ -145,14 +145,10 @@ def main():
 
     html_template = '<table border="1" style="border-collapse:collapse">'
     html_template += '<thead>'
-    html_template += '<tr>'
     html_template += '<<header_placeholder>>'
-    html_template += '</tr>'
     html_template += '</thead>'
     html_template += '<tbody>'
-    html_template += '<tr>'
     html_template += '<<salary_placeholder>>'
-    html_template += '</tr>'
     html_template += '</tbody>'
     html_template += '</table>'
 

@@ -91,7 +91,8 @@ def get_cell_merge(row, col, merged_cells):
     return {"type": "normal"}
 
 
-def fill_table(row_datas):
+def fill_table(row_datas, style):
+    grid = 'td' if style == 'td' else 'th'
     holder_str = ''
     for row_cells in row_datas:
         holder_str += '<tr>'
@@ -101,18 +102,19 @@ def fill_table(row_datas):
             except Exception as e:
                 print(e)
             if cell["merge"]["type"] == 'rowspan':
-                holder_str += '<td style="padding-left:20px;padding-right:20px;" rowspan="%s">%s</td>' % (
-                    cell["merge"]["rowspan"], val)
+                holder_str += '<%s style="padding-left:20px;padding-right:20px;" rowspan="%s">%s</%s>'\
+                              % (grid, cell["merge"]["rowspan"], val, grid)
             if cell["merge"]["type"] == 'colspan':
-                holder_str += '<td style="text-align:center;" colspan="%s">%s</td>' % (
-                    cell["merge"]["colspan"], val)
+                holder_str += '<%s style="text-align:center;" colspan="%s">%s</%s>' \
+                              % (grid, cell["merge"]["colspan"], val, grid)
             if cell["merge"]["type"] == 'mix':
-                holder_str += '<td style="text-align:center;" rowspan="%s" colspan="%s">%s</td>' % \
-                              (cell["merge"]["rowspan"], cell["merge"]["colspan"], val)
+                holder_str += '<%s style="text-align:center;" rowspan="%s" colspan="%s">%s</%s>'\
+                              % (grid, cell["merge"]["rowspan"], cell["merge"]["colspan"], val, grid)
             if cell["merge"]["type"] == 'none':
                 pass
             if cell["merge"]["type"] == 'normal':
-                holder_str += '<td style="padding-left:20px;padding-right:20px;">%s</td>' % val
+                holder_str += '<%s style="padding-left:20px;padding-right:20px;">%s</%s>'\
+                              % (grid, val, grid)
         holder_str += '</tr>'
     return holder_str
 
@@ -154,7 +156,7 @@ def main():
 
     excel_data, item_lines_arr = read_data(current_dir + os.sep + 'data.xlsx')
     header_datas = excel_data[0:item_lines_arr[0]]
-    holder_str = fill_table(header_datas)
+    holder_str = fill_table(header_datas, 'th')
     html_template = html_template.replace('<<header_placeholder>>', holder_str)
 
     has_failture = False
@@ -162,7 +164,7 @@ def main():
     for staff_lines in item_lines_arr[1:]:
         staff_email = excel_data[staff_index][0]["value"]
         staff_datas = excel_data[staff_index:staff_index + staff_lines]
-        holder_str = fill_table(staff_datas)
+        holder_str = fill_table(staff_datas, 'td')
         html_content = html_template.replace('<<salary_placeholder>>', holder_str)
         if staff_email is not None:
             staff_email = staff_email.replace("\n", "").replace("\r", "").replace(" ", "")

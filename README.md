@@ -12,7 +12,9 @@
 
    邮件发送服务器smtp.exmail.qq.com，端口号465，使用SSL。
 
-3. 在data.xlsx填入员工工资信息。对excel文件的要求：**第一行为标题，第一列为邮箱**
+   如果要保留已发送的邮件到腾讯服务器，请在网页版邮箱的“设置”→“账户”里面勾选“SMTP发信后保存到服务器”
+
+3. 在data.xlsx填入员工工资信息。对excel文件的要求：**第一列为邮箱**
 
 ### 发送邮件
 ```
@@ -23,7 +25,7 @@ python3 send_email.py
 
 ##### update log
 
-2018.02.07：已支持合并单元格
+2020.07.15：支持合并单元格
 
-![](./screenshot/screenshot.png)
+![](./screenshot/screenshot.jpg)
 

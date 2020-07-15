@@ -42,40 +42,32 @@ def send_mail(to_addr, subject, html_template, user_mail, user_passwd, smtp_serv
 
 
 def read_data(excel_file):
-    data = []
-    titles = []
-    # rows number one staff in excel
-    staff_rows = []
+    excel_data = []
+    # occupy lines for each item(table header,staff salary,staff salary....)
+    item_lines_arr = []
     wb = load_workbook(filename=excel_file, read_only=False, data_only=True)
     ws = wb.worksheets[0]
-    first_line = True
     for row in ws.rows:
-        item = []
-        first_column = True
-        for cell in row:
-            if first_line:
-                titles.append(cell.value)
-            else:
-                if first_column:
-                    rows_check = check_merge(cell.row, cell.col_idx, ws.merged_cells)
-                    if rows_check["type"] == 'rowspan':
-                        staff_rows.append(rows_check["rowspan"])
-                    elif rows_check["type"] == 'normal':
-                        staff_rows.append(1)
-                item.append({
-                    "value": cell.value,
-                    "coordinate": cell.coordinate,
-                    "col": cell.col_idx,
-                    "row": cell.row
-                })
-            first_column = False
-        if not first_line:
-            data.append(item)
-        first_line = False
-    return titles, data, ws.merged_cells, staff_rows
+        row_cells = []
+        for index, cell in enumerate(row):
+            cell_merge = get_cell_merge(cell.row, cell.column, ws.merged_cells)
+            if index == 0:
+                if cell_merge["type"] == 'rowspan':
+                    item_lines_arr.append(cell_merge["rowspan"])
+                elif cell_merge["type"] == 'normal':
+                    item_lines_arr.append(1)
+            row_cells.append({
+                "value": cell.value,
+                "coordinate": cell.coordinate,
+                "col": cell.column,
+                "row": cell.row,
+                "merge": cell_merge
+            })
+        excel_data.append(row_cells)
+    return excel_data, item_lines_arr
 
 
-def check_merge(row, col, merged_cells):
+def get_cell_merge(row, col, merged_cells):
     for item in merged_cells.ranges:
         # on the same column
         if item.min_col == item.max_col == col:
@@ -99,6 +91,32 @@ def check_merge(row, col, merged_cells):
     return {"type": "normal"}
 
 
+def fill_table(row_datas):
+    holder_str = ''
+    for row_cells in row_datas:
+        holder_str += '<tr>'
+        for cell in row_cells[1:]:
+            try:
+                val = '' if cell["value"] is None else cell["value"]
+            except Exception as e:
+                print(e)
+            if cell["merge"]["type"] == 'rowspan':
+                holder_str += '<td style="padding-left:20px;padding-right:20px;" rowspan="%s">%s</td>' % (
+                    cell["merge"]["rowspan"], val)
+            if cell["merge"]["type"] == 'colspan':
+                holder_str += '<td style="text-align:center;" colspan="%s">%s</td>' % (
+                    cell["merge"]["colspan"], val)
+            if cell["merge"]["type"] == 'mix':
+                holder_str += '<td style="text-align:center;" rowspan="%s" colspan="%s">%s</td>' % \
+                              (cell["merge"]["rowspan"], cell["merge"]["colspan"], val)
+            if cell["merge"]["type"] == 'none':
+                pass
+            if cell["merge"]["type"] == 'normal':
+                holder_str += '<td style="padding-left:20px;padding-right:20px;">%s</td>' % val
+        holder_str += '</tr>'
+    return holder_str
+
+
 def main():
     cf = configparser.ConfigParser()
     cf.read(current_dir + os.sep + 'config.ini')
@@ -107,19 +125,6 @@ def main():
     server = cf.get('user', 'smtp_server')
     port = cf.getint('user', 'smtp_port')
     enable_ssl = cf.getboolean('user', 'enable_ssl')
-    titles, salary_data, merged_cells, staff_rows = read_data(current_dir + os.sep + 'data.xlsx')
-    html_template = '<table border="1" style="border-collapse:collapse">'
-    html_template += '<thead>'
-    html_template += '<tr>'
-    titles = ['' if v is None else v for v in titles]
-    for title in titles[1:]:
-        html_template += '<th style="padding-left:20px;padding-right:20px">' + title + '</th>'
-    html_template += '</tr>'
-    html_template += '</thead>'
-    html_template += '<tbody>'
-    html_template += '<<placeholder>>'
-    html_template += '</tbody>'
-    html_template += '</table>'
 
     today_day = datetime.datetime.now().day
     today_month = datetime.datetime.now().month
@@ -127,7 +132,7 @@ def main():
     print('Today is ' + time.strftime("%B %d"))
     mail_subject = "%s月份工资条，请查收"
     # Pay money before the 10th of each month
-    if today_day > 5:
+    if today_day > 10:
         mail_subject = mail_subject % today_month
     else:
         today_month = today_month - 1
@@ -137,43 +142,42 @@ def main():
     english_month = datetime.date(1900, today_month, 1).strftime('%B')
     print('The mail subject will be show as "' + english_month + ' salley bill"')
     print("\n")
+
+    html_template = '<table border="1" style="border-collapse:collapse">'
+    html_template += '<thead>'
+    html_template += '<tr>'
+    html_template += '<<header_placeholder>>'
+    html_template += '</tr>'
+    html_template += '</thead>'
+    html_template += '<tbody>'
+    html_template += '<tr>'
+    html_template += '<<salary_placeholder>>'
+    html_template += '</tr>'
+    html_template += '</tbody>'
+    html_template += '</table>'
+
+    excel_data, item_lines_arr = read_data(current_dir + os.sep + 'data.xlsx')
+    header_datas = excel_data[0:item_lines_arr[0]]
+    holder_str = fill_table(header_datas)
+    html_template = html_template.replace('<<header_placeholder>>', holder_str)
+
     has_failture = False
-    row_index = 0
-    for staff_row in staff_rows:
-        staff_email = salary_data[row_index][0]["value"]
-        holder_str = ''
-        for item in salary_data[row_index:row_index + staff_row]:
-            holder_str += '<tr>'
-            for i in item[1:]:
-                check = check_merge(i["row"], i["col"], merged_cells)
-                try:
-                    val = '' if i["value"] is None else i["value"]
-                except Exception as e:
-                    print(e)
-                if check["type"] == 'rowspan':
-                    holder_str += '<td style="padding-left:20px;padding-right:20px;" rowspan="%s">%s</td>' % (
-                        check["rowspan"], val)
-                if check["type"] == 'colspan':
-                    holder_str += '<td style="text-align:center;" colspan="%s">%s</td>' % (check["colspan"], val)
-                if check["type"] == 'mix':
-                    holder_str += '<td style="text-align:center;" rowspan="%s" colspan="%s">%s</td>' % (
-                    check["rowspan"], check["colspan"], val)
-                if check["type"] == 'none':
-                    pass
-                if check["type"] == 'normal':
-                    holder_str += '<td style="padding-left:20px;padding-right:20px;">%s</td>' % val
-            holder_str += '</tr>'
-        html_content = html_template.replace('<<placeholder>>', holder_str)
+    staff_index = item_lines_arr[0]
+    for staff_lines in item_lines_arr[1:]:
+        staff_email = excel_data[staff_index][0]["value"]
+        staff_datas = excel_data[staff_index:staff_index + staff_lines]
+        holder_str = fill_table(staff_datas)
+        html_content = html_template.replace('<<salary_placeholder>>', holder_str)
         if staff_email is not None:
+            staff_email = staff_email.replace("\n", "").replace("\r", "").replace(" ", "")
             send_result = send_mail(staff_email, mail_subject, html_content, user, pwd, server, port, enable_ssl)
             if not send_result:
                 has_failture = True
                 print('mail to:' + str(staff_email) + ' failed!!!,please send this email manually.')
-                loginfo('mail to:' + str(staff_email) + ' failed!!!,please send this email manually.')
             else:
                 print('mail to:' + str(staff_email) + ' Successfully')
                 time.sleep(1)
-        row_index += staff_row
+        staff_index += staff_lines
     print("\n")
     if has_failture:
         print("There are some mails failed to be send, please check theme in the log.txt")

@@ -154,8 +154,9 @@ def main():
     print('The mail subject will be show as "' + english_month + ' salley bill"')
     print("\n")
 
-    html_template = '<pre>' + read_attach() + '</pre>'
-    html_template += '<br/><br/><table border="1" style="border-collapse:collapse">'
+    attach_text = read_attach()
+    html_template = '<pre>' + attach_text + '</pre><br/>' if attach_text else ''
+    html_template += '<table border="1" style="border-collapse:collapse">'
     html_template += '<thead>'
     html_template += '<<header_placeholder>>'
     html_template += '</thead>'

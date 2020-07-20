@@ -20,6 +20,8 @@
 
 3. 在data.xlsx填入员工工资信息。对excel文件的要求：**第一列为邮箱**
 
+4. 在attach.txt里填入追加文本，（如果不需要追加文本，可以把attach.txt的内容置空或者删掉此文件）
+
 ### 发送邮件
 ```
 python3 send_email.py

@@ -67,6 +67,15 @@ def read_data(excel_file):
     return excel_data, item_lines_arr
 
 
+def read_attach():
+    attach_path = current_dir + os.sep + 'attach.txt'
+    if os.path.exists(attach_path):
+        with open(attach_path, 'r', encoding='utf-8', errors='ignore') as f:
+            return f.read()
+    else:
+        return ''
+
+
 def get_cell_merge(row, col, merged_cells):
     for item in merged_cells.ranges:
         # on the same column
@@ -145,7 +154,8 @@ def main():
     print('The mail subject will be show as "' + english_month + ' salley bill"')
     print("\n")
 
-    html_template = '<table border="1" style="border-collapse:collapse">'
+    html_template = '<pre>' + read_attach() + '</pre>'
+    html_template += '<br/><br/><table border="1" style="border-collapse:collapse">'
     html_template += '<thead>'
     html_template += '<<header_placeholder>>'
     html_template += '</thead>'
